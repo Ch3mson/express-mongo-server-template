@@ -2,6 +2,8 @@ import express from 'express';
 
 const app = express();
 
+app.use(express.json()) // register middleware
+
 const PORT = process.env.PORT || 3000;
 
 const mockUsers = [
@@ -34,6 +36,18 @@ app.get('/api/users', (request, response) => {
     return response.send(mockUsers);
 });
 
+
+// post requests have data in its 'request body' or 'payload'
+app.post('/api/users', (request, response) => {
+    const { body } = request; // takes only the body from request
+    console.log(request.body); // now prints only the body
+    const newUser = { id: mockUsers[mockUsers.length - 1].id + 1, ...body};
+    mockUsers.push(newUser)
+
+    return response.status(201).send(newUser)
+})
+
+
 app.post
 
 app.get('/api/users/:id', (request, response) => {
@@ -53,9 +67,6 @@ app.get('/api/users/:id', (request, response) => {
 app.get('/api/products', (request, response) => {
     response.send([{ id: 123, name: "chicken breast", price: 12.99}])
 });
-
-// post requests have data in its 'request body' or 'payload'
-
 
 
 
