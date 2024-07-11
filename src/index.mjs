@@ -34,6 +34,8 @@ app.get('/api/users', (request, response) => {
     return response.send(mockUsers);
 });
 
+app.post
+
 app.get('/api/users/:id', (request, response) => {
     console.log(request.params); // tells us the parameter id
     const parsedId = parseInt(request.params.id); // is it valid?
