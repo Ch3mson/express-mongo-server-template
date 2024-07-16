@@ -16,6 +16,15 @@ router.get('/api/users', query('filter')
 .withMessage('must be 3-10 characters'),
 
 (request, response) => {
+    console.log(request.session.id);
+    request.sessionStore.get(request.session.id, (err, sessionData) => {
+        if (err) {
+            console.log(err);
+            throw err;
+        }
+        console.log(sessionData);
+    });
+
     const result = validationResult(request);
     console.log(result)
     const { query: { filter, value } } = request;
