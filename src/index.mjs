@@ -7,7 +7,11 @@ import mongoose from 'mongoose'
 import './strategies/local-strategy.mjs'
 
 const app = express();
-mongoose.connect('mongodb://localhost:27017');  
+
+mongoose
+    .connect('mongodb://localhost:27017')
+    .then(() => console.log("connected to database"))
+    .catch((err) => console.log(`error: ${err}`));  
 
 app.use(express.json()); // register middleware
 app.use(cookieParser("helloworld"));

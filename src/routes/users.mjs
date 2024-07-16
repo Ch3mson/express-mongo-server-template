@@ -3,6 +3,7 @@ import { query, validationResult, checkSchema, matchedData } from 'express-valid
 import { mockUsers } from '../utils/constants.mjs'
 import { createUserValidationSchema } from '../utils/validationSchemas.mjs';
 import { resolveIndexByUserId } from '../utils/middleware.mjs';
+import { User } from '../mongoose/schemas/user.mjs';
 const router = Router()
 
 
@@ -45,22 +46,19 @@ router.get('/api/users/:id', resolveIndexByUserId, (request, response) => {
 })
 
 // post requests have data in its 'request body' or 'payload'
-router.post('/api/users', checkSchema(createUserValidationSchema),
-    (request, response) => {
-        const result = validationResult(request);
-        console.log(result)
-        
-        if(!result.isEmpty()) return response.status(400).send({ errors: result.array() });
-
-        const data = matchedData(request); // use this matchedData instead of request.body
-        console.log(data);
-
-        const newUser = { id: mockUsers[mockUsers.length - 1].id + 1, ...data}; // returns rest of user like whatever u sent
-        mockUsers.push(newUser); // push onto the database
-
-        return response.status(201).send(newUser);
+router.post('/api/users', async (request, response) => {
+    const { body } = request;
+    const newUser = new User(body); // constructor from schema
+    
+    try {
+        const savedUser = await newUser.save(); // save is async so need await
+        return response.status(201).send(savedUser)
+    } catch (err) {
+        console.log(err);
+        console.log("THIS SHITS BROKEN");
+        return response.status(400).send(err);
     }
-);
+});
 
 router.put('/api/users/:id', resolveIndexByUserId, (request, response) => {
     const { body, findUserIndex } = request; // keep request body
