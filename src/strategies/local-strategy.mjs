@@ -1,17 +1,19 @@
 import passport from 'passport';
 import { Strategy } from 'passport-local';
 import { mockUsers } from '../utils/constants.mjs';
+import { User } from '../mongoose/schemas/user.mjs';
 
 passport.serializeUser((user, done) => {
     console.log(`inside serialize user:`);
     console.log(user);
-    done(null, user.username); // make user argument unique, like its id
+    done(null, user.id); // make user argument unique, like its id
 });
 
-passport.deserializeUser((username, done) => { // that id is the used in deserializer
+passport.deserializeUser(async (id, done) => { // that id is the used in deserializer
     console.log(`inside Deserializer:`);
+    console.log(`deserializing user ID: ${id}`);
     try {
-        const findUser = mockUsers.find((user) => user.username === username)
+        const findUser = await User.findById(id);
         if (!findUser) throw new Error('user not found');
         done(null, findUser)
     } catch (err) {
@@ -20,17 +22,13 @@ passport.deserializeUser((username, done) => { // that id is the used in deseria
 })
 
 export default passport.use(
-    new Strategy((username, password, done) => {
-        console.log(`Username: ${username}`);
-        console.log(`Password: ${password}`);
+    new Strategy(async (username, password, done) => {
         try {
-            const findUser = mockUsers.find((user) => user.username === username);
+            const findUser = await User.findOne({ username });
             if (!findUser) throw new Error('user not found');
-            if (findUser.password !== password) throw new Error('invalid credentials');
-            
-            done (null, findUser);
-
-        } catch (err) {
+            if (findUser.password !== password) throw new Error('bad credentials');
+            done(null, findUser);
+        } catch (err) { // if username not found
             done(err, null);
         }
     })
