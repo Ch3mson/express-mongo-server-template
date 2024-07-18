@@ -24,6 +24,7 @@ router.get('/api/users', query('filter')
             console.log(err);
             throw err;
         }
+        console.log("inside seession store get");
         console.log(sessionData);
     });
 

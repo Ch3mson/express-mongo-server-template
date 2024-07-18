@@ -4,7 +4,9 @@ import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import passport from 'passport';
 import mongoose from 'mongoose'
-import './strategies/local-strategy.mjs'
+import MongoStore from 'connect-mongo';
+import "./strategies/discord-strategy.mjs"
+// import './strategies/local-strategy.mjs'
 
 const app = express();
 
@@ -21,7 +23,10 @@ app.use(session({
     resave: false,
     cookie: {
         maxAge: 60000 * 60
-    }
+    },
+    store: MongoStore.create({
+        client: mongoose.connection.getClient()
+    })
 }));
 
 app.use(passport.initialize());
@@ -37,6 +42,7 @@ app.get('/api/auth/status', (request, response) => {
     console.log(`inside /auth/status endpoint:`);
     console.log(request.user);
     console.log(request.session); // the session contains 
+    console.log(request.sessionID); // same one in mongo
     return request.user ? response.send(request.user) : response.sendStatus(401)
 })
 
@@ -47,6 +53,16 @@ app.post('/api/auth/logout', (request, response) => {
         return response.sendStatus(200);
     })
 })
+
+app.get('/api/auth/discord', passport.authenticate('discord'));
+// authorize redirects to this url bellow
+app.get('/api/auth/discord/redirect', passport.authenticate('discord'),
+    (request, response) => {
+        console.log(request.session);
+        console.log(request.user);
+        response.sendStatus(200);
+    }
+);
 
 const PORT = process.env.PORT || 3000;
 
