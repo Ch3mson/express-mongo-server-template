@@ -5,6 +5,8 @@ import { createUserValidationSchema } from '../utils/validationSchemas.mjs';
 import { resolveIndexByUserId } from '../utils/middleware.mjs';
 import { User } from '../mongoose/schemas/user.mjs';
 import { hashPassword } from '../utils/helpers.mjs'
+import { getUserByIdHandler } from '../handlers/users.mjs';
+import { createUserHandler } from '../handlers/users.mjs';
 const router = Router()
 
 
@@ -40,35 +42,10 @@ router.get('/api/users', query('filter')
 return response.send(mockUsers);
 });
 
-router.get('/api/users/:id', resolveIndexByUserId, (request, response) => {
-    const { findUserIndex } = request;
-    const findUser = mockUsers[findUserIndex]
-    if (!findUser) return response.sendStatus(404);
-    return response.send(findUser)
-})
+router.get('/api/users/:id', resolveIndexByUserId, getUserByIdHandler);
 
 // post requests have data in its 'request body' or 'payload'
-router.post(
-    '/api/users', 
-    checkSchema(createUserValidationSchema), 
-        async (request, response) => {
-        const result = validationResult(request);
-        if (!result.isEmpty()) return response.status(400).send(result.array());
-
-        const data = matchedData(request);
-        console.log(data);
-        data.password = hashPassword(data.password)
-        const newUser = new User(data); // constructor from schema
-        
-        try {
-            const savedUser = await newUser.save(); // save is async so need await
-            return response.status(201).send(savedUser)
-        } catch (err) {
-            console.log(err);
-            console.log("THIS SHITS BROKEN");
-            return response.sendStatus(400);
-        }
-});
+router.post('/api/users', checkSchema(createUserValidationSchema), createUserHandler);
 
 router.put('/api/users/:id', resolveIndexByUserId, (request, response) => {
     const { body, findUserIndex } = request; // keep request body
