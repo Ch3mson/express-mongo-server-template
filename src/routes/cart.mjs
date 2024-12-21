@@ -3,7 +3,7 @@ import { Router } from 'express';
 const router = Router()
 
 router.post('/api/cart', (request, response) => {
-    if (!request.session.user) return response.status(401);
+    if (!request.user) return response.sendStatus(401);
     const { body: item } = request;
 
     const { cart } = request.session 
@@ -17,7 +17,7 @@ router.post('/api/cart', (request, response) => {
 });
 
 router.get('/api/cart', (request, response) => {
-    if (!request.session.user) return response.status(401);
+    if (!request.user) return response.sendStatus(401);
     return response.send(request.session.cart ?? [])
 })
 

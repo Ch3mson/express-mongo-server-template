@@ -12,7 +12,7 @@ passport.deserializeUser(async (id, done) => { // that id is the used in deseria
     console.log(`inside Deserializer:`);
     console.log(`deserializing user ID: ${id}`);
     try {
-        const findUser = await User.findById(id);
+        const findUser = await DiscordUser.findById(id);
         if (!findUser) throw new Error('user not found');
         done(null, findUser)
     } catch (err) {

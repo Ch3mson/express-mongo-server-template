@@ -6,6 +6,7 @@ import passport from 'passport';
 import MongoStore from 'connect-mongo';
 import mongoose from 'mongoose'
 import './strategies/local-strategy.mjs'
+import './strategies/discord-strategy.mjs'
 
 export function createApp() {
 

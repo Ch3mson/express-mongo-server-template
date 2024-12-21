@@ -1,6 +1,7 @@
 import passport from 'passport';
 import { Strategy } from 'passport-local';
 import { mockUsers } from '../utils/constants.mjs';
+import { DiscordUser } from '../mongoose/schemas/discord-user.mjs';  // Add this import
 import { User } from '../mongoose/schemas/user.mjs';
 import { comparePassword } from '../utils/helpers.mjs';
 
@@ -14,7 +15,10 @@ passport.deserializeUser(async (id, done) => { // that id is the used in deseria
     console.log(`inside Deserializer:`);
     console.log(`deserializing user ID: ${id}`);
     try {
-        const findUser = await DiscordUser.findById(id);
+        let findUser = await User.findById(id);
+        if (!findUser) {
+            findUser = await DiscordUser.findById(id);
+        }
         return findUser ? done(null, findUser) : done(null, null); // null for user null for err
     } catch (err) {
         done(err, null);
